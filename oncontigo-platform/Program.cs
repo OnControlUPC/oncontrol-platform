@@ -1,8 +1,6 @@
 using Microsoft.OpenApi.Models;
 using oncontigo_platform.IAM.Infrastructure.Pipeline.Middleware.Extensions;
-using oncontigo_platform.Shared.Infrastructure.Interfaces.ASP.Configuration;
 using oncontigo_platform.Shared.Infrastructure.Persistence.EPC.Configuration;
-using MySql.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using oncontigo_platform.IAM.Application.Internal.CommandServices;
 using oncontigo_platform.IAM.Application.Internal.OutboundServices;
@@ -38,8 +36,7 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 
 builder.Services.AddControllers(options => options.Conventions.Add(new KebabCaseRouteNamingConvention()));
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
-
+var connectionString = Environment.GetEnvironmentVariable("AZURE_MYSQL_CONNECTIONSTRING");
 
 builder.Services.AddDbContext<AppDbContext>(options =>
 {
@@ -47,7 +44,7 @@ builder.Services.AddDbContext<AppDbContext>(options =>
     if (builder.Environment.IsDevelopment())
         options.UseMySQL(connectionString)
             .LogTo(Console.WriteLine, LogLevel.Information)
-            .EnableSensitiveDataLogging()
+            .EnableSensitiveDataLogging(false)
             .EnableDetailedErrors();
     else if (builder.Environment.IsProduction())
         options.UseMySQL(connectionString)
